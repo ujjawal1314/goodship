@@ -13,6 +13,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const allowedOrigins = [
   process.env.CLIENT_URL,
+  "https://goodship1.netlify.app",
   "http://localhost:3000",
   "http://localhost:5173",
   "http://127.0.0.1:5173"
@@ -22,6 +23,10 @@ app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      // Allow any goodship*.netlify.app subdomain
+      if (origin && /^https:\/\/goodship[a-z0-9-]*\.netlify\.app$/.test(origin)) {
         return callback(null, true);
       }
       return callback(new Error("Not allowed by CORS"));

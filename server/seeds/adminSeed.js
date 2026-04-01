@@ -11,7 +11,7 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 const seedAdmins = [
   { username: "ujjwal", password: "ujjwal" },
   { username: "akash", password: "akash" },
-  { username: "ryan", password: "ryan" }
+  { username: "ryan", password: "1234567890" }
 ];
 
 const runSeed = async () => {

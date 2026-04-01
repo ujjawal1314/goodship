@@ -6,7 +6,9 @@
     "dev": "nodemon --legacy-watch server.js",
     "start": "node server.js",
     "seed:admins": "node seeds/adminSeed.js",
-    "seed:delivery-partners": "node seeds/deliveryPartnerSeed.js"
+    "seed:delivery-partners": "node seeds/deliveryPartnerSeed.js",
+    "seed:orders": "node seeds/orderSeed.js",
+    "seed:all": "node seeds/deliveryPartnerSeed.js && node seeds/adminSeed.js && node seeds/orderSeed.js"
   },
   "engines": {
     "node": ">=18.0.0"
