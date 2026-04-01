@@ -331,13 +331,26 @@ h1 {
 
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 0.9rem;
   margin-top: 1rem;
+  align-items: start;
 }
 
-.wide-field {
+.field-span-2,
+.submit-field {
   grid-column: span 2;
+}
+
+.submit-field {
+  display: flex;
+  align-self: stretch;
+}
+
+.submit-field .button {
+  width: 100%;
+  min-height: 100%;
+  border-radius: 28px;
 }
 
 input,
@@ -964,9 +977,18 @@ td {
     height: 1rem;
   }
 
-  .wide-field,
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .field-span-2,
+  .submit-field,
   .detail-item-wide {
     grid-column: span 1;
+  }
+
+  .submit-field .button {
+    min-height: 44px;
   }
 
   .status-bar-row {

@@ -131,7 +131,7 @@ function CreateOrderForm({ apiBaseUrl, authToken, onOrderCreated, onUnauthorized
           placeholder="Shipping Address"
           value={formData.shippingAddress}
           onChange={handleChange}
-          className="wide-field"
+          className="field-span-2"
           rows="3"
           required
         />
@@ -140,13 +140,15 @@ function CreateOrderForm({ apiBaseUrl, authToken, onOrderCreated, onUnauthorized
           placeholder="Billing Address"
           value={formData.billingAddress}
           onChange={handleChange}
-          className="wide-field"
+          className="field-span-2"
           rows="3"
           required
         />
-        <button type="submit" className="button button-primary" disabled={submitting}>
-          {submitting ? "Creating..." : "Create Order"}
-        </button>
+        <div className="submit-field">
+          <button type="submit" className="button button-primary" disabled={submitting}>
+            {submitting ? "Creating..." : "Create Order"}
+          </button>
+        </div>
       </form>
       {message && <p className="success">{message}</p>}
       {error && <p className="error">{error}</p>}
