@@ -67,10 +67,6 @@ const orderSchema = new mongoose.Schema(
       ref: "DeliveryPartner",
       default: null
     },
-    deliveryOTP: {
-      type: String,
-      default: null
-    },
     feedback: {
       overallRating: {
         type: Number,

@@ -77,7 +77,11 @@ function TrackOrder({ apiBaseUrl }) {
     try {
       await fetchTrackedOrder(orderId.trim());
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to track order.");
+      setError(
+        err.response?.status === 404
+          ? "No order found with this ID"
+          : err.response?.data?.message || "Failed to track order."
+      );
     } finally {
       setLoading(false);
     }
@@ -228,12 +232,6 @@ function TrackOrder({ apiBaseUrl }) {
                 <strong>{deliveryDetails.partnerName}</strong>
                 <p>{deliveryDetails.partnerPhone}</p>
                 <span className="vehicle-badge">{deliveryDetails.vehicleType}</span>
-              </article>
-
-              <article className="parcel-otp-card">
-                <h3>Show this OTP to receive your parcel</h3>
-                <p>This was also sent to your email.</p>
-                <p>OTP delivered to your registered email.</p>
               </article>
             </div>
           ) : null}

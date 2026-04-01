@@ -1,5 +1,3 @@
-const bcrypt = require("bcryptjs");
-const crypto = require("crypto");
 const { Order, ORDER_STATUSES } = require("../models/Order");
 const DeliveryPartner = require("../models/DeliveryPartner");
 const { sendDeliveryPartnerEmail } = require("../utils/mailer");
@@ -46,8 +44,6 @@ const sanitizeOrder = (orderDoc) => {
     ...order,
     id: order.orderId
   };
-
-  delete sanitized.deliveryOTP;
   return sanitized;
 };
 
@@ -60,24 +56,18 @@ const releaseAssignedPartner = async (order, { clearPartnerReference = false } =
       await partner.save();
     }
   }
-
-  order.deliveryOTP = null;
   if (clearPartnerReference) {
     order.deliveryPartner = null;
   }
 };
 
 const finalizeDeliveryPartnerAssignment = async (order, partner) => {
-  const plainOTP = String(crypto.randomInt(1000, 10000));
-  const deliveryOTP = await bcrypt.hash(plainOTP, 10);
-
   order.deliveryPartner = partner._id;
-  order.deliveryOTP = deliveryOTP;
 
   partner.available = false;
   await partner.save();
 
-  return { partner, plainOTP };
+  return { partner };
 };
 
 const assignDeliveryPartner = async (order, deliveryPartnerId) => {
@@ -218,8 +208,7 @@ const getOrderDeliveryDetails = async (req, res) => {
     return res.json({
       partnerName: order.deliveryPartner.name,
       partnerPhone: order.deliveryPartner.phone,
-      vehicleType: order.deliveryPartner.vehicleType,
-      hasDeliveryOTP: true
+      vehicleType: order.deliveryPartner.vehicleType
     });
   } catch (error) {
     return res.status(500).json({ message: "Failed to load delivery details.", error: error.message });
@@ -254,7 +243,6 @@ const updateOrderStatus = async (req, res) => {
     }
 
     let assignedPartner = null;
-    let plainOTP = null;
 
     if (status === "Out for Delivery" && previousStatus === "Out for Delivery") {
       await releaseAssignedPartner(order, { clearPartnerReference: true });
@@ -266,7 +254,6 @@ const updateOrderStatus = async (req, res) => {
         return res.status(400).json({ message: assignment.error });
       }
       assignedPartner = assignment.partner;
-      plainOTP = assignment.plainOTP;
     }
 
     if (status === "Out for Delivery" && previousStatus !== "Out for Delivery") {
@@ -278,7 +265,6 @@ const updateOrderStatus = async (req, res) => {
         return res.status(400).json({ message: assignment.error });
       }
       assignedPartner = assignment.partner;
-      plainOTP = assignment.plainOTP;
     }
 
     order.status = status;
@@ -293,13 +279,12 @@ const updateOrderStatus = async (req, res) => {
 
     await order.save();
 
-    if (assignedPartner && plainOTP) {
+    if (assignedPartner) {
       await sendDeliveryPartnerEmail(
         order.customerEmail,
         assignedPartner.name,
         assignedPartner.phone,
-        assignedPartner.vehicleType,
-        plainOTP
+        assignedPartner.vehicleType
       );
     }
 
