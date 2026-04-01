@@ -21,7 +21,7 @@ function FeedbackSummary({ summary }) {
       <h2>Customer Feedback Summary</h2>
       <p className="section-copy">A snapshot of customer satisfaction and recent delivery feedback.</p>
 
-      <div className="metrics-grid">
+      <div className="metrics-grid feedback-metrics-grid">
         <article className="metric-card">
           <p>Total Feedbacks received</p>
           <h3>{totalFeedbacks}</h3>

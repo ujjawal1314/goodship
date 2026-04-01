@@ -57,7 +57,7 @@ function AdminInsights({ orders, feedbackSummary }) {
       <h2>Insights</h2>
       <p className="section-copy">A live operational snapshot powered by the current order list.</p>
 
-      <div className="metrics-grid">
+      <div className="metrics-grid admin-metrics-grid">
         <article className="metric-card">
           <p>Total Orders</p>
           <h3>{totalOrders}</h3>
@@ -80,7 +80,7 @@ function AdminInsights({ orders, feedbackSummary }) {
         </article>
       </div>
 
-      <div className="charts-grid">
+      <div className="charts-grid admin-charts-grid">
         <article className="chart-card">
           <h3>Status Distribution</h3>
           <div className="status-bars">
@@ -101,9 +101,9 @@ function AdminInsights({ orders, feedbackSummary }) {
 
         <article className="chart-card">
           <h3>Orders in Last 7 Days</h3>
-          <div className="weekly-bars">
+          <div className="weekly-bars admin-weekly-bars">
             {last7Days.map((day) => (
-              <div key={day.key} className="weekly-bar-col">
+              <div key={day.key} className="weekly-bar-col admin-weekly-bar-col">
                 <div className="weekly-bar-wrap">
                   <div
                     className="weekly-bar-fill"
