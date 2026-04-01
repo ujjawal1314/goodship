@@ -67,14 +67,7 @@ const releaseAssignedPartner = async (order, { clearPartnerReference = false } =
   }
 };
 
-const assignDeliveryPartner = async (order) => {
-  const availablePartners = await DeliveryPartner.find({ available: true });
-
-  if (!availablePartners.length) {
-    return { error: "No delivery partners available currently. Try again shortly." };
-  }
-
-  const partner = availablePartners[Math.floor(Math.random() * availablePartners.length)];
+const finalizeDeliveryPartnerAssignment = async (order, partner) => {
   const plainOTP = String(crypto.randomInt(1000, 10000));
   const deliveryOTP = await bcrypt.hash(plainOTP, 10);
 
@@ -85,6 +78,33 @@ const assignDeliveryPartner = async (order) => {
   await partner.save();
 
   return { partner, plainOTP };
+};
+
+const assignDeliveryPartner = async (order, deliveryPartnerId) => {
+  let partner = null;
+
+  if (deliveryPartnerId) {
+    partner = await DeliveryPartner.findById(deliveryPartnerId);
+
+    if (!partner) {
+      return { notFound: true, message: "Delivery partner not found." };
+    }
+
+    const currentPartnerId = order.deliveryPartner?._id?.toString?.() || order.deliveryPartner?.toString?.();
+    if (!partner.available && partner._id.toString() !== currentPartnerId) {
+      return { error: "Selected delivery partner is currently unavailable." };
+    }
+  } else {
+    const availablePartners = await DeliveryPartner.find({ available: true });
+
+    if (!availablePartners.length) {
+      return { error: "No delivery partners available currently. Try again shortly." };
+    }
+
+    partner = availablePartners[Math.floor(Math.random() * availablePartners.length)];
+  }
+
+  return finalizeDeliveryPartnerAssignment(order, partner);
 };
 
 const createOrder = async (req, res) => {
@@ -208,7 +228,7 @@ const getOrderDeliveryDetails = async (req, res) => {
 
 const updateOrderStatus = async (req, res) => {
   try {
-    const { status } = req.body;
+    const { status, deliveryPartnerId } = req.body;
 
     if (!ORDER_STATUSES.includes(status)) {
       return res.status(400).json({ message: "Invalid status." });
@@ -236,8 +256,24 @@ const updateOrderStatus = async (req, res) => {
     let assignedPartner = null;
     let plainOTP = null;
 
+    if (status === "Out for Delivery" && previousStatus === "Out for Delivery") {
+      await releaseAssignedPartner(order, { clearPartnerReference: true });
+      const assignment = await assignDeliveryPartner(order, deliveryPartnerId);
+      if (assignment.notFound) {
+        return res.status(404).json({ message: assignment.message });
+      }
+      if (assignment.error) {
+        return res.status(400).json({ message: assignment.error });
+      }
+      assignedPartner = assignment.partner;
+      plainOTP = assignment.plainOTP;
+    }
+
     if (status === "Out for Delivery" && previousStatus !== "Out for Delivery") {
-      const assignment = await assignDeliveryPartner(order);
+      const assignment = await assignDeliveryPartner(order, deliveryPartnerId);
+      if (assignment.notFound) {
+        return res.status(404).json({ message: assignment.message });
+      }
       if (assignment.error) {
         return res.status(400).json({ message: assignment.error });
       }

@@ -22,16 +22,17 @@ function SharedHeader({ onAdminClick, showLogout = false, onLogout }) {
           </button>
         </nav>
 
-        <div className="header-brand-area">
+        <Link to="/" className="brand-lockup">
+          <span className="brand-name">GoodShip</span>
+          <span className="brand-subtitle">Order Tracking System</span>
+        </Link>
+
+        <div className="header-right">
           {showLogout ? (
             <button type="button" className="button button-secondary header-logout" onClick={onLogout}>
               Logout
             </button>
-          ) : null}
-          <Link to="/" className="brand-lockup">
-            <span className="brand-name">GoodShip</span>
-            <span className="brand-subtitle">Order Tracking System</span>
-          </Link>
+          ) : <div className="header-logout-spacer" aria-hidden="true" />}
         </div>
       </div>
     </header>

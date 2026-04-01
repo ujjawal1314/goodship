@@ -5,7 +5,7 @@ const connectDB = require("./config/db");
 const orderRoutes = require("./routes/orderRoutes");
 const authRoutes = require("./routes/authRoutes");
 const feedbackRoutes = require("./routes/feedbackRoutes");
-
+const partnerRoutes = require("./routes/partnerRoutes");
 dotenv.config();
 connectDB();
 
@@ -43,6 +43,8 @@ app.get("/", (_req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/feedback", feedbackRoutes);
+app.use("/api/partners", partnerRoutes);
+app.use("/api/delivery-partners", partnerRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

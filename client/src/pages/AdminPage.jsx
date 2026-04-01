@@ -19,9 +19,11 @@ function AdminPage({ apiBaseUrl, onUnauthorized }) {
   });
   const [authChecking, setAuthChecking] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [partnersLoading, setPartnersLoading] = useState(false);
   const [error, setError] = useState("");
   const [updatingOrderId, setUpdatingOrderId] = useState("");
   const [authToken, setAuthToken] = useState("");
+  const [allPartners, setAllPartners] = useState([]);
 
   const handleUnauthorized = () => {
     onUnauthorized?.();
@@ -66,6 +68,22 @@ function AdminPage({ apiBaseUrl, onUnauthorized }) {
     }
   };
 
+  const fetchDeliveryPartners = async (token) => {
+    setPartnersLoading(true);
+    try {
+      const { data } = await axios.get(`${apiBaseUrl}/delivery-partners`, {
+        headers: getAuthHeaders(token)
+      });
+      setAllPartners(data);
+    } catch (err) {
+      if (err.response?.status === 401) {
+        handleUnauthorized();
+      }
+    } finally {
+      setPartnersLoading(false);
+    }
+  };
+
   useEffect(() => {
     const verifyAccess = async () => {
       const token = getAdminToken();
@@ -80,7 +98,7 @@ function AdminPage({ apiBaseUrl, onUnauthorized }) {
           headers: getAuthHeaders(token)
         });
         setAuthToken(token);
-        await Promise.all([fetchOrders(token), fetchFeedbackSummary(token)]);
+        await Promise.all([fetchOrders(token), fetchFeedbackSummary(token), fetchDeliveryPartners(token)]);
       } catch (_error) {
         handleUnauthorized();
       } finally {
@@ -93,27 +111,37 @@ function AdminPage({ apiBaseUrl, onUnauthorized }) {
 
   const handleOrderCreated = (newOrder) => {
     setOrders((prev) => [newOrder, ...prev]);
+    fetchOrders(authToken);
+    fetchDeliveryPartners(authToken);
   };
 
-  const handleStatusUpdate = async (orderId, status) => {
+  const handleStatusUpdate = async (orderId, status, deliveryPartnerId) => {
     setUpdatingOrderId(orderId);
     setError("");
     try {
       const { data } = await axios.patch(
         `${apiBaseUrl}/orders/${orderId}/status`,
-        { status },
+        {
+          status,
+          ...(deliveryPartnerId ? { deliveryPartnerId } : {})
+        },
         {
           headers: getAuthHeaders(authToken)
         }
       );
       setOrders((prev) => prev.map((order) => (order.orderId === orderId ? data : order)));
-      await fetchFeedbackSummary(authToken);
+      await Promise.all([
+        fetchOrders(authToken),
+        fetchFeedbackSummary(authToken),
+        fetchDeliveryPartners(authToken)
+      ]);
     } catch (err) {
       if (err.response?.status === 401) {
         handleUnauthorized();
-        return;
+        throw err;
       }
       setError(err.response?.data?.message || "Failed to update order status.");
+      throw err;
     } finally {
       setUpdatingOrderId("");
     }
@@ -156,6 +184,8 @@ function AdminPage({ apiBaseUrl, onUnauthorized }) {
         allowStatusUpdate
         onStatusUpdate={handleStatusUpdate}
         updatingOrderId={updatingOrderId}
+        allPartners={allPartners}
+        partnersLoading={partnersLoading}
       />
     </main>
   );
