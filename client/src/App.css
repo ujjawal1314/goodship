@@ -29,6 +29,7 @@ body {
   font-family: "DM Sans", sans-serif;
   color: var(--text);
   background: var(--bg);
+  overflow-x: hidden;
 }
 
 a {
@@ -45,6 +46,10 @@ select {
 #root,
 .app-shell {
   min-height: 100vh;
+}
+
+#root {
+  overflow-x: hidden;
 }
 
 .site-header {
@@ -157,11 +162,14 @@ th {
 }
 
 .page-shell {
-  width: min(1180px, calc(100% - 2rem));
+  width: 100%;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 1.5rem 0 3rem;
+  padding: 24px 24px;
   display: grid;
   gap: 1.25rem;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .landing-page {
@@ -171,6 +179,7 @@ th {
   padding: 0;
   gap: 0;
   position: relative;
+  overflow-x: hidden;
 }
 
 .card {
@@ -302,6 +311,7 @@ h1 {
   background-repeat: no-repeat;
   background-size: cover;
   display: block;
+  overflow-x: hidden;
 }
 
 .client-hero {
@@ -342,26 +352,44 @@ h1 {
 
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 0.9rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
   margin-top: 1rem;
   align-items: start;
 }
 
-.field-span-2,
-.submit-field {
-  grid-column: span 2;
+.field-span-2 {
+  grid-column: span 1;
+}
+
+.form-grid textarea {
+  min-width: 0;
+}
+
+.form-grid .field-span-2:nth-last-of-type(2),
+.form-grid .field-span-2:nth-last-of-type(1) {
+  grid-column: span 1;
+}
+
+.form-grid textarea.field-span-2 {
+  grid-column: auto;
+}
+
+.form-grid textarea[name="shippingAddress"],
+.form-grid textarea[name="billingAddress"] {
+  grid-column: span 1;
 }
 
 .submit-field {
-  display: flex;
-  align-self: stretch;
+  grid-column: 1 / -1;
+  display: block;
+  margin-top: 12px;
 }
 
 .submit-field .button {
-  width: 100%;
-  min-height: 100%;
-  border-radius: 28px;
+  display: block;
+  width: fit-content;
+  min-height: 44px;
 }
 
 input,
@@ -564,7 +592,7 @@ select:focus {
 
 .result-grid,
 .metrics-grid {
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 .detail-item {
@@ -823,6 +851,7 @@ select:focus {
 .table-wrap {
   margin-top: 1rem;
   overflow-x: auto;
+  width: 100%;
 }
 
 table {
@@ -1134,7 +1163,7 @@ td {
   }
 
   .submit-field .button {
-    min-height: 44px;
+    width: 100%;
   }
 
   .status-bar-row {
@@ -1143,5 +1172,17 @@ td {
 
   .partners-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .metrics-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
